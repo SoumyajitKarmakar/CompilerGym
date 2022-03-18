@@ -13,6 +13,7 @@ can be used as a starting point for custom converters.
 """
 import json
 from builtins import getattr
+from collections import OrderedDict
 from typing import Any, Callable
 from typing import Dict as DictType
 from typing import List, Type, Union
@@ -272,6 +273,7 @@ class ToEventMessageConverter:
             DictEvent: "event_dict",
             bool: "boolean_value",
             int: "int64_value",
+            np.int32: "int64_value",
             np.float32: "float_value",
             float: "double_value",
             str: "string_value",
@@ -471,12 +473,14 @@ def to_event_message_default_converter() -> ToEventMessageConverter:
         int: convert_trivial,
         float: convert_trivial,
         str: convert_trivial,
+        np.int32: convert_trivial,
         np.ndarray: NumpyToTensorMessageConverter(),
     }
     type_based_converter = TypeBasedConverter(conversion_map)
     res = ToEventMessageConverter(type_based_converter)
     conversion_map[list] = ToListEventMessageConverter(res)
     conversion_map[dict] = ToDictEventMessageConverter(res)
+    conversion_map[OrderedDict] = ToDictEventMessageConverter(res)
     return res
 
 
